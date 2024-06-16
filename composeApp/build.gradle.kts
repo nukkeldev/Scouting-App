@@ -1,4 +1,3 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.compose.ExperimentalComposeLibrary
 
 plugins {
@@ -7,8 +6,6 @@ plugins {
     alias(libs.plugins.jetbrainsCompose)
     id("kotlin-parcelize")
 }
-
-
 
 repositories {
     google()
@@ -24,25 +21,13 @@ kotlin {
         }
     }
 
-    jvm("desktop")
-
-
     sourceSets {
-        val desktopMain by getting
-
         androidMain.dependencies {
             implementation(libs.compose.ui)
             implementation(libs.compose.ui.tooling.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.material3)
             implementation(libs.coil.compose)
-        }
-
-        desktopMain.dependencies {
-            implementation(compose.desktop.currentOs)
-            implementation(libs.kotlinx.coroutines.test)
-            // https://mvnrepository.com/artifact/com.github.librepdf/openpdf
-            implementation(libs.openpdf)
         }
 
         commonMain.dependencies {
@@ -103,18 +88,5 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
-    }
-}
-
-compose.desktop {
-    application {
-        mainClass = "MainKt"
-
-        nativeDistributions {
-            //appResourcesRootDir = (rootDir.toPath() / "desktopMain").toFile()
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "org.tahomarobotics.scouting"
-            packageVersion = "1.0.0"
-        }
     }
 }
