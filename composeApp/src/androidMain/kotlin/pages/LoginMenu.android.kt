@@ -34,7 +34,7 @@ actual fun LoginMenu(
     scoutName: MutableState<String>,
     comp: MutableState<String>
 ) {
-    val logo = File("Logo.png")
+    val logo = File("composeResources/drawable/logo.png")
     var compDD by remember { mutableStateOf(false) }
     var deleteData by remember { mutableStateOf(false) }
     val context = LocalContext.current

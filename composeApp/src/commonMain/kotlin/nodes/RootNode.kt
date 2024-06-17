@@ -1,87 +1,95 @@
 package nodes
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.state.ToggleableState
 import com.bumble.appyx.components.backstack.BackStack
 import com.bumble.appyx.components.backstack.BackStackModel
-import androidx.compose.runtime.*
-import androidx.compose.ui.state.ToggleableState
 import com.bumble.appyx.components.backstack.ui.fader.BackStackFader
-import com.bumble.appyx.navigation.composable.AppyxComponent
-import com.bumble.appyx.navigation.modality.BuildContext
+import com.bumble.appyx.navigation.composable.AppyxNavigationContainer
+import com.bumble.appyx.navigation.modality.NodeContext
 import com.bumble.appyx.navigation.node.Node
-import com.bumble.appyx.navigation.node.ParentNode
-import com.bumble.appyx.utils.multiplatform.Parcelable
-import com.bumble.appyx.utils.multiplatform.Parcelize
-import pages.*
+import com.bumble.appyx.navigation.node.node
+import pages.LoginMenu
+import pages.MainMenu
+import pages.PitsScoutMenu
 import java.lang.Integer.parseInt
 
 
 class RootNode(
-    buildContext: BuildContext,
+    nodeContext: NodeContext,
     private val backStack: BackStack<NavTarget> = BackStack(
         model = BackStackModel(
             initialTarget = NavTarget.LoginPage,
-            savedStateMap = buildContext.savedStateMap
+            savedStateMap = nodeContext.savedStateMap
         ),
         visualisation = { BackStackFader(it) }
     )
-) : ParentNode<RootNode.NavTarget>(
+) : Node<RootNode.NavTarget>(
     appyxComponent = backStack,
-    buildContext = buildContext
-){
+    nodeContext = nodeContext
+) {
     private var team = mutableIntStateOf(1)
     private var robotStartPosition = mutableIntStateOf(0)
     private var pitsPerson = mutableStateOf("P1")
-    private var comp =  mutableStateOf("")
+    private var comp = mutableStateOf("")
 
-
-    sealed class NavTarget : Parcelable {
-        @Parcelize
+    sealed class NavTarget {
         data object MainMenu : NavTarget()
-
-        @Parcelize
         data object MatchScouting : NavTarget()
-
-        @Parcelize
         data object PitsScouting : NavTarget()
-
-        @Parcelize
         data object LoginPage : NavTarget()
     }
 
-    override fun resolve(interactionTarget: NavTarget, buildContext: BuildContext): Node =
-        when (interactionTarget) {
-            NavTarget.LoginPage -> LoginNode(buildContext, backStack, scoutName, comp)
-            NavTarget.MainMenu -> MainMenu(buildContext, backStack, robotStartPosition,scoutName, comp, team)
-            NavTarget.MatchScouting -> AutoTeleSelectorNode(buildContext,robotStartPosition, team, backStack)
-            NavTarget.PitsScouting -> PitsScoutMenu(buildContext,backStack,pitsPerson,scoutName)
+    @RequiresApi(Build.VERSION_CODES.P)
+    override fun buildChildNode(navTarget: NavTarget, nodeContext: NodeContext): Node<*> =
+        when (navTarget) {
+            NavTarget.LoginPage -> node(nodeContext) { LoginMenu(backStack, scoutName, comp) }
+            is NavTarget.MainMenu -> node(nodeContext) { modifier ->
+                MainMenu(
+                    nodeContext,
+                    backStack,
+                    robotStartPosition,
+                    scoutName,
+                    comp,
+                    team,
+                    modifier
+                )
+            }
+
+            NavTarget.MatchScouting -> AutoTeleSelectorNode(
+                nodeContext,
+                robotStartPosition,
+                team,
+                backStack
+            )
+
+            NavTarget.PitsScouting -> node(nodeContext)  { PitsScoutMenu(backStack, pitsPerson, scoutName) }
         }
 
     @Composable
-    override fun View(modifier: Modifier) {
-
+    override fun Content(modifier: Modifier) {
         Column {
-
-            AppyxComponent(
+            AppyxNavigationContainer(
                 appyxComponent = backStack,
                 modifier = Modifier.weight(0.9f)
             )
-
         }
-
     }
 }
 
-var scoutName =  mutableStateOf("")
+var scoutName = mutableStateOf("")
 val matchScoutArray = HashMap<Int, HashMap<Int, String>>()
 
-
-fun loadData(match: Int, team: MutableIntState, robotStartPosition: MutableIntState){
+fun loadData(match: Int, team: MutableIntState, robotStartPosition: MutableIntState) {
     reset()
-    if(matchScoutArray[robotStartPosition.intValue]?.get(match)?.isEmpty() == false) {
+    if (matchScoutArray[robotStartPosition.intValue]?.get(match)?.isEmpty() == false) {
         fun intToState(i: Int) = when (i) {
             0 -> ToggleableState.Off
             1 -> ToggleableState.Indeterminate
@@ -89,7 +97,11 @@ fun loadData(match: Int, team: MutableIntState, robotStartPosition: MutableIntSt
             else -> ToggleableState.Off
         }
 
-        val help = matchScoutArray[robotStartPosition.intValue]?.get(match)?.split('/') ?: createOutput(team, robotStartPosition).split('/')
+        val help =
+            matchScoutArray[robotStartPosition.intValue]?.get(match)?.split('/') ?: createOutput(
+                team,
+                robotStartPosition
+            ).split('/')
         team.intValue = parseInt(help[1])
 
         autoSpeakerNum.intValue = parseInt(help[3])
@@ -116,7 +128,7 @@ fun loadData(match: Int, team: MutableIntState, robotStartPosition: MutableIntSt
     }
 }
 
-fun reset(){
+fun reset() {
     autoSpeakerNum.intValue = 0
     autoAmpNum.intValue = 0
     collected.intValue = 0

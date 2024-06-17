@@ -16,3 +16,6 @@ captures
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
 *.log
+
+# Kotlin 2.0
+.kotlin/

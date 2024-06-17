@@ -20,8 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.bumble.appyx.components.backstack.BackStack
 import com.bumble.appyx.components.backstack.operation.push
-import com.bumble.appyx.navigation.modality.BuildContext
-import com.bumble.appyx.navigation.node.Node
+import com.bumble.appyx.navigation.modality.NodeContext
 import compKey
 import defaultSecondary
 import getCurrentTheme
@@ -32,32 +31,35 @@ import kotlinx.coroutines.launch
 import matchData
 import nodes.RootNode
 import nodes.match
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 import org.json.JSONException
+import scouting_app.composeapp.generated.resources.Res
+import scouting_app.composeapp.generated.resources.checkmark
+import scouting_app.composeapp.generated.resources.crossmark
 import sendData
 import sendDataUSB
 import setTeam
 import sync
 import teamData
 
-actual class MainMenu actual constructor(
-    buildContext: BuildContext,
-    private val backStack: BackStack<RootNode.NavTarget>,
-    private val robotStartPosition: MutableIntState,
-    private val scoutName: MutableState<String>,
-    private val comp: MutableState<String>,
-    private val team: MutableIntState
-) : Node(buildContext = buildContext) {
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    @OptIn(ExperimentalResourceApi::class, ExperimentalMaterial3Api::class)
-    @Composable
-    actual override fun View(modifier: Modifier) {
+@RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalResourceApi::class, ExperimentalMaterial3Api::class)
+@Composable
+actual fun MainMenu(
+    nodeContext: NodeContext,
+    backStack: BackStack<RootNode.NavTarget>,
+    robotStartPosition: MutableIntState,
+    scoutName: MutableState<String>,
+    comp: MutableState<String>,
+    team: MutableIntState,
+    modifier: Modifier,
+) {
         val context = LocalContext.current
         var selectedPlacement by remember { mutableStateOf(false) }
-        var matchSyncedResource by remember { mutableStateOf(if (matchData == null) "crossmark.png" else "checkmark.png") }
-        var teamSyncedResource by remember { mutableStateOf(if (teamData == null) "crossmark.png" else "checkmark.png") }
+        var teamSyncedResource: DrawableResource by remember { mutableStateOf(if (teamData == null) Res.drawable.crossmark else Res.drawable.checkmark) }
+        var matchSyncedResource: DrawableResource by remember { mutableStateOf(if (matchData == null) Res.drawable.crossmark else Res.drawable.checkmark) }
         var serverDialogOpen by remember { mutableStateOf(false) }
 
         var ipAddressErrorDialog by remember { mutableStateOf(false) }
@@ -264,8 +266,8 @@ actual class MainMenu actual constructor(
                     val scope = CoroutineScope(Dispatchers.Default)
                     scope.launch {
                         sync(true, context)
-                        teamSyncedResource = if (teamData != null)  "checkmark.png" else "crossmark.png"
-                        matchSyncedResource = if (matchData != null)  "checkmark.png" else "crossmark.png"
+                        teamSyncedResource = if (teamData == null) Res.drawable.crossmark else Res.drawable.checkmark
+                        matchSyncedResource = if (matchData == null) Res.drawable.crossmark else Res.drawable.checkmark
                     }
                 },
                 modifier = Modifier
@@ -291,7 +293,7 @@ actual class MainMenu actual constructor(
                         Text ("Robot List")
 
                         Image(
-                            painterResource(res = teamSyncedResource),
+                            painterResource(teamSyncedResource),
                             contentDescription = "status",
                             modifier = Modifier
                                 .size(30.dp)
@@ -305,7 +307,7 @@ actual class MainMenu actual constructor(
                         Text ("Match List")
 
                         Image(
-                            painterResource(res = matchSyncedResource),
+                            painterResource(matchSyncedResource),
                             contentDescription = "status",
                             modifier = Modifier
                                 .size(30.dp)
@@ -336,8 +338,8 @@ actual class MainMenu actual constructor(
                     colors = ButtonDefaults.buttonColors(containerColor = defaultSecondary),
                     onClick = {
                         setEventCode = true
-                        teamSyncedResource = "crossmark.png"
-                        matchSyncedResource = "crossmark.png"
+                        teamSyncedResource = Res.drawable.crossmark
+                        matchSyncedResource = Res.drawable.crossmark
                     },
                     modifier = Modifier.align(Alignment.CenterEnd)
                 ) {
@@ -378,7 +380,6 @@ actual class MainMenu actual constructor(
             }
         }
     }
-}
 
 var ipAddress = mutableStateOf("127.0.0.1")
 val openError = mutableStateOf(false)

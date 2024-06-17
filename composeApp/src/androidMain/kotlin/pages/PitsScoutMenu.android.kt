@@ -1,8 +1,5 @@
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
-
 package pages
 
-import nodes.RootNode
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
@@ -11,12 +8,44 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,30 +61,27 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.bumble.appyx.components.backstack.BackStack
 import com.bumble.appyx.components.backstack.operation.push
-import com.bumble.appyx.navigation.modality.BuildContext
-import com.bumble.appyx.navigation.node.Node
 import composables.Profile
 import composables.download
 import defaultOnPrimary
 import defaultPrimaryVariant
-import org.jetbrains.compose.resources.ExperimentalResourceApi
+import nodes.RootNode
 import org.jetbrains.compose.resources.painterResource
 import org.tahomarobotics.scouting.ComposeFileProvider
+import scouting_app.composeapp.generated.resources.Res
+import scouting_app.composeapp.generated.resources.kill_cam
 import java.io.File
 
-@Suppress("VARIABLE_WITH_REDUNDANT_INITIALIZER")
-actual class PitsScoutMenu actual constructor(
-    buildContext: BuildContext,
-    private val backStack: BackStack<RootNode.NavTarget>,
-    private var pitsPerson: MutableState<String>,
-    private var scoutName: MutableState<String>
-) : Node(buildContext = buildContext) {
 
-    @OptIn(ExperimentalResourceApi::class)
-    @SuppressLint("NewApi")
-    @RequiresApi(Build.VERSION_CODES.P)
-    @Composable
-    actual override fun View(modifier: Modifier) {
+@SuppressLint("NewApi")
+@RequiresApi(Build.VERSION_CODES.P)
+@Composable
+@Suppress("VARIABLE_WITH_REDUNDANT_INITIALIZER")
+actual fun PitsScoutMenu(
+    backStack: BackStack<RootNode.NavTarget>,
+    pitsPerson: MutableState<String>,
+    scoutName: MutableState<String>
+) {
         val launcher = rememberLauncherForActivityResult(
             ActivityResultContracts.RequestPermission()
         ) { _: Boolean ->
@@ -84,8 +110,8 @@ actual class PitsScoutMenu actual constructor(
         val isScrollEnabled by remember{ mutableStateOf(true)}
         var robotCard by remember {mutableStateOf(false)}
         val context = LocalContext.current
-        val trashCan = ImageRequest.Builder(context).data(File("trash.png")).build()
-        val cam = ImageRequest.Builder(context).data(File("KillCam.png")).build()
+        val trashCan = ImageRequest.Builder(context).data(File("composeResources/drawable/trash.png")).build()
+        val cam = ImageRequest.Builder(context).data(File("composeResources/drawable/kill-cam.png")).build()
         Column(modifier = Modifier
             .verticalScroll(state = scrollState, enabled = isScrollEnabled)
             .padding(5.dp)) {
@@ -254,7 +280,7 @@ actual class PitsScoutMenu actual constructor(
             ) {
                 Row {
                     Image(
-                        painter = painterResource("KillCam.png"),
+                        painter = painterResource(Res.drawable.kill_cam),
                         contentDescription = "Camera",
                         modifier = Modifier.fillMaxHeight()
                     )
@@ -397,4 +423,3 @@ actual class PitsScoutMenu actual constructor(
             }
         }
     }
-}

@@ -1,65 +1,89 @@
 package nodes
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableIntState
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.state.ToggleableState
 import com.bumble.appyx.components.backstack.BackStack
 import com.bumble.appyx.components.backstack.BackStackModel
 import com.bumble.appyx.components.backstack.ui.fader.BackStackFader
-import com.bumble.appyx.navigation.composable.AppyxComponent
-import com.bumble.appyx.navigation.modality.BuildContext
+import com.bumble.appyx.navigation.composable.AppyxNavigationContainer
+import com.bumble.appyx.navigation.modality.NodeContext
 import com.bumble.appyx.navigation.node.Node
-import com.bumble.appyx.navigation.node.ParentNode
-import com.bumble.appyx.utils.multiplatform.Parcelable
-import com.bumble.appyx.utils.multiplatform.Parcelize
+import com.bumble.appyx.navigation.node.node
+import pages.AutoMenu
 import pages.AutoTeleSelectorMenu
+import pages.TeleMenu
 
 class AutoTeleSelectorNode(
-    buildContext: BuildContext,
+    nodeContext: NodeContext,
     private var robotStartPosition: MutableIntState,
     private val team: MutableIntState,
     private val mainMenuBackStack: BackStack<RootNode.NavTarget>,
     private val backStack: BackStack<NavTarget> = BackStack(
         model = BackStackModel(
             initialTarget = NavTarget.AutoScouting,
-            savedStateMap = buildContext.savedStateMap
+            savedStateMap = nodeContext.savedStateMap
         ),
         visualisation = { BackStackFader(it) }
     )
-) : ParentNode<AutoTeleSelectorNode.NavTarget>(
+) : Node<AutoTeleSelectorNode.NavTarget>(
     appyxComponent = backStack,
-    buildContext = buildContext
+    nodeContext
 ) {
     private val selectAuto = mutableStateOf(false)
 
-
-    sealed class NavTarget : Parcelable {
-        @Parcelize
+    sealed class NavTarget {
         data object AutoScouting : NavTarget()
-
-        @Parcelize
         data object TeleScouting : NavTarget()
     }
 
-    override fun resolve(interactionTarget: NavTarget, buildContext: BuildContext): Node =
-        when (interactionTarget) {
-            NavTarget.AutoScouting -> AutoNode(buildContext, backStack, mainMenuBackStack, selectAuto, match, team, robotStartPosition)
-            NavTarget.TeleScouting -> TeleNode(buildContext, backStack, mainMenuBackStack, selectAuto, match, team, robotStartPosition)
+    override fun buildChildNode(navTarget: NavTarget, nodeContext: NodeContext): Node<*> =
+        when (navTarget) {
+            NavTarget.AutoScouting -> node(nodeContext) {
+                AutoMenu(
+                    backStack,
+                    mainMenuBackStack,
+                    selectAuto,
+                    match,
+                    team,
+                    robotStartPosition
+                )
+            }
+
+            NavTarget.TeleScouting -> node(nodeContext) {
+                TeleMenu(
+                    backStack,
+                    mainMenuBackStack,
+                    selectAuto,
+                    match,
+                    team,
+                    robotStartPosition
+                )
+            }
         }
 
     @Composable
-    override fun View(modifier: Modifier) {
+    override fun Content(modifier: Modifier) {
         Column {
-            AutoTeleSelectorMenu(match, team, robotStartPosition, selectAuto, backStack, mainMenuBackStack)
-            AppyxComponent(
+            AutoTeleSelectorMenu(
+                match,
+                team,
+                robotStartPosition,
+                selectAuto,
+                backStack,
+                mainMenuBackStack
+            )
+            AppyxNavigationContainer(
                 appyxComponent = backStack,
                 modifier = Modifier.weight(0.9f)
             )
         }
     }
 }
-
 
 
 val match = mutableStateOf("1")
@@ -69,8 +93,8 @@ val collected = mutableIntStateOf(0)
 val autoSMissed = mutableIntStateOf(0)
 val autoAMissed = mutableIntStateOf(0)
 var autos = mutableStateOf("")
-val teleSpeakerNum  =  mutableIntStateOf(0)
-val teleAmpNum  = mutableIntStateOf(0)
+val teleSpeakerNum = mutableIntStateOf(0)
+val teleAmpNum = mutableIntStateOf(0)
 val telePassed = mutableIntStateOf(0)
 val teleTrapNum = mutableIntStateOf(0)
 val teleSMissed = mutableIntStateOf(0)
@@ -88,12 +112,17 @@ fun createOutput(team: MutableIntState, robotStartPosition: MutableIntState): St
         ToggleableState.Indeterminate -> 1
         ToggleableState.On -> 2
     }
-    if (autos.value.isEmpty()){ autos.value = " "}
-    autos.value = autos.value.replace(":","")
-    if (teleNotes.value.isEmpty()){ teleNotes.value = "No Comments"}
-    teleNotes.value = teleNotes.value.replace(":","")
+    if (autos.value.isEmpty()) {
+        autos.value = " "
+    }
+    autos.value = autos.value.replace(":", "")
+    if (teleNotes.value.isEmpty()) {
+        teleNotes.value = "No Comments"
+    }
+    teleNotes.value = teleNotes.value.replace(":", "")
     val teleNotesFinal = "autopath:${autos.value}:${teleNotes.value}:${scoutName.value}"
-    return delimString("/",
+    return delimString(
+        "/",
         match.value,
         team.intValue.toString(),
         robotStartPosition.intValue.toString(),
@@ -115,9 +144,9 @@ fun createOutput(team: MutableIntState, robotStartPosition: MutableIntState): St
     )
 }
 
-private fun delimString(delimiter: String, vararg inputs: String) : String {
+private fun delimString(delimiter: String, vararg inputs: String): String {
     val endString = StringBuilder()
-    inputs.forEach { endString.append (it + delimiter) }
+    inputs.forEach { endString.append(it + delimiter) }
     endString.deleteAt(endString.lastIndex)
     return endString.toString()
 }
