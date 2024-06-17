@@ -7,9 +7,9 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.ExperimentalUnitApi
 import com.bumble.appyx.navigation.integration.NodeActivity
@@ -24,20 +24,15 @@ import defaultPrimary
 import defaultSecondary
 import defaultSurface
 import nodes.RootNode
-import openScoutFile
 
 @ExperimentalUnitApi
 @ExperimentalAnimationApi
 @ExperimentalComposeUiApi
 class MainActivity : NodeActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-
-            openScoutFile(LocalContext.current)
-
             MaterialTheme(
                 colorScheme = defaultScheme
             ) {

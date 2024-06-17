@@ -1,8 +1,29 @@
 package pages
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.VerticalDivider
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableIntState
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -17,13 +38,10 @@ import com.bumble.appyx.components.backstack.operation.push
 import composables.InternetErrorAlert
 import defaultBackground
 import defaultOnBackground
-import defaultOnPrimary
 import defaultPrimaryVariant
-import exportScoutData
 import getCurrentTheme
-import nodes.*
-import org.json.JSONException
-import setTeam
+import nodes.AutoTeleSelectorNode
+import nodes.RootNode
 import java.lang.Integer.parseInt
 
 @Composable
@@ -35,7 +53,6 @@ actual fun AutoTeleSelectorMenu(
     backStack: BackStack<AutoTeleSelectorNode.NavTarget>,
     mainMenuBackStack: BackStack<RootNode.NavTarget>
 ) {
-
     var pageName by remember { mutableStateOf("Auto") }
     var positionName by remember { mutableStateOf("") }
     val context = LocalContext.current
@@ -45,13 +62,13 @@ actual fun AutoTeleSelectorMenu(
         openError.value -> {
             InternetErrorAlert {
                 openError.value = false
-                mainMenuBackStack.pop()
+//                mainMenuBackStack.pop()
             }
         }
     }
 
 
-    when (robotStartPosition.intValue){
+    when (robotStartPosition.intValue) {
         0 -> {positionName = "R1"}
         1 -> {positionName = "R2"}
         2 -> {positionName = "R3"}
@@ -87,11 +104,6 @@ actual fun AutoTeleSelectorMenu(
                 color = defaultPrimaryVariant,
                 thickness = 3.dp
             )
-            val textColor = if (positionName.lowercase().contains("b")) {
-                Color(red = 0.1f, green = Color.Cyan.green - 0.4f, blue = Color.Cyan.blue - 0.2f)
-            } else {
-                Color.Red
-            }
 
             TextField(
                 value = team.intValue.toString(),
@@ -100,7 +112,6 @@ actual fun AutoTeleSelectorMenu(
                     teamNumAsText = filteredText.slice(0..<filteredText.length.coerceAtMost(5))//WHY IS FILTER NOT FILTERING
                     if (teamNumAsText.isNotEmpty() || teamNumAsText.contains(','))
                         team.intValue = parseInt(teamNumAsText)
-                    println(createOutput(team,robotStartPosition))
                 },
                 colors = TextFieldDefaults.colors(
                     unfocusedContainerColor = getCurrentTheme().background,
@@ -111,7 +122,6 @@ actual fun AutoTeleSelectorMenu(
                 ),
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
-//                    .padding(horizontal = 25.dp)
                     .width(125.dp),
                 textStyle = TextStyle.Default.copy(fontSize = 31.sp),
                 singleLine = true,
@@ -130,36 +140,36 @@ actual fun AutoTeleSelectorMenu(
                 fontSize = 28.sp
             )
 
-            TextField(
-                value = match.value,
-                onValueChange = { value ->
-                    val temp = value.filter { it.isDigit() }
-                    match.value = temp.slice(0..<temp.length.coerceAtMost(5))
-                    if(match.value != ""){
-                        loadData(parseInt(temp), team, robotStartPosition)
-                        matchScoutArray[robotStartPosition.intValue]?.set(parseInt(match.value),
-                            createOutput(team, robotStartPosition)
-                        )
-                        exportScoutData(context)
-                    }
-                    try {
-                        setTeam(team, nodes.match, robotStartPosition.intValue)
-                    } catch (e: JSONException) {
-                        openError.value = true
-                    }
-                    teamNumAsText = team.intValue.toString()
-                }, 
-                modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.colors(
-                    unfocusedContainerColor = getCurrentTheme().background,
-                    unfocusedTextColor = getCurrentTheme().onPrimary,
-                    focusedContainerColor = getCurrentTheme().background,
-                    focusedTextColor = getCurrentTheme().onPrimary,
-                    cursorColor = getCurrentTheme().onSecondary
-                ),
-                singleLine = true,
-                textStyle = TextStyle.Default.copy(fontSize = 28.sp)
-            )
+//            TextField(
+//                value = match.value,
+//                onValueChange = { value ->
+//                    val temp = value.filter { it.isDigit() }
+//                    match.value = temp.slice(0..<temp.length.coerceAtMost(5))
+//                    if(match.value != ""){
+//                        loadData(parseInt(temp), team, robotStartPosition)
+//                        matchScoutArray[robotStartPosition.intValue]?.set(parseInt(match.value),
+//                            createOutput(team, robotStartPosition)
+//                        )
+//                        exportScoutData(context)
+//                    }
+//                    try {
+//                        setTeam(team, nodes.match, robotStartPosition.intValue)
+//                    } catch (e: JSONException) {
+//                        openError.value = true
+//                    }
+//                    teamNumAsText = team.intValue.toString()
+//                },
+//                modifier = Modifier.fillMaxWidth(),
+//                colors = TextFieldDefaults.colors(
+//                    unfocusedContainerColor = getCurrentTheme().background,
+//                    unfocusedTextColor = getCurrentTheme().onPrimary,
+//                    focusedContainerColor = getCurrentTheme().background,
+//                    focusedTextColor = getCurrentTheme().onPrimary,
+//                    cursorColor = getCurrentTheme().onSecondary
+//                ),
+//                singleLine = true,
+//                textStyle = TextStyle.Default.copy(fontSize = 28.sp)
+//            )
 
         }
 

@@ -15,9 +15,8 @@ import defaultOnPrimary
 import defaultSecondary
 
 @Composable
-actual fun EnumerableValue(label: String, value: MutableIntState) {
+actual fun EnumerableValue(label: String, get: () -> Int, set: (Int) -> Unit) {
     Box(modifier = Modifier.fillMaxWidth()) {
-
         Text(
             label,
             fontSize = 25.sp,
@@ -33,9 +32,7 @@ actual fun EnumerableValue(label: String, value: MutableIntState) {
                     contentColor = defaultOnPrimary
                 ),
                 onClick = {
-                    value.value -= 1
-                    if (value.value < 0)
-                        value.value = 0
+                    set(get() - 1)
                 }
             ) {
                 Text(
@@ -45,7 +42,7 @@ actual fun EnumerableValue(label: String, value: MutableIntState) {
                 )
             }
             Text(
-                text = value.value.toString(),
+                text = get().toString(),
                 fontSize = 30.sp,
                 modifier = Modifier.padding(5.dp).align(Alignment.CenterVertically)
             )
@@ -57,7 +54,7 @@ actual fun EnumerableValue(label: String, value: MutableIntState) {
                     contentColor = defaultOnPrimary
                 ),
                 onClick = {
-                    value.value += 1
+                    set(get() + 1)
                 }
             ) {
                 Text(

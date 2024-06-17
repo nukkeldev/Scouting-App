@@ -12,7 +12,6 @@ import java.time.format.DateTimeFormatter
 
 var compKey = "2024week0"
 
-
 var matchData: JSONObject? = null
 var teamData: JSONObject? = null
 

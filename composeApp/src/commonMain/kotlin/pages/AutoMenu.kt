@@ -6,15 +6,13 @@ import androidx.compose.runtime.MutableState
 import com.bumble.appyx.components.backstack.BackStack
 import nodes.AutoTeleSelectorNode
 import nodes.RootNode
+import nodes.ScoutingLog
 
 @Composable
 expect fun AutoMenu(
     backStack: BackStack<AutoTeleSelectorNode.NavTarget>,
     mainMenuBackStack: BackStack<RootNode.NavTarget>,
-
-    selectAuto: MutableState<Boolean>,
-
-    match: MutableState<String>,
-    team: MutableIntState,
-    robotStartPosition: MutableIntState
+    scoutingLog: MutableState<ScoutingLog>,
+    scoutName: String,
+    saveLog: (clear: Boolean) -> Unit
 )

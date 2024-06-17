@@ -5,6 +5,5 @@ import androidx.compose.runtime.MutableIntState
 
 @Composable
 expect fun EnumerableValue(
-    label: String,
-    value: MutableIntState
+    label: String, get: () -> Int, set: (Int) -> Unit
 )

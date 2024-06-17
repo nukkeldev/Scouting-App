@@ -4,10 +4,8 @@ import android.hardware.usb.UsbConstants.USB_DIR_OUT
 import android.hardware.usb.UsbManager
 import android.hardware.usb.UsbRequest
 import android.os.Build
-import android.os.Parcel
 import android.util.Log
 import androidx.annotation.RequiresApi
-import nodes.matchScoutArray
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -17,81 +15,80 @@ import java.net.Socket
 import java.net.SocketException
 import java.nio.ByteBuffer
 
+fun File.overwriteString(data: String?) {
+    if (delete()) createNewFile()
+
+    writer().use { writer ->
+        data?.let { writer.write(it) }
+    }
+}
 
 fun createFile(context: Context) {
-    val file = File(context.filesDir, "match_data.json")
-    file.delete()
-    file.createNewFile()
-
-    val writer = FileWriter(file)
-
-    matchData?.toString(1)?.let { writer.write(it) }
-    writer.close()
-
-    val teamFile = File(context.filesDir,"team_data.json")
-    teamFile.delete()
-    teamFile.createNewFile()
-    val teamWriter = FileWriter(teamFile)
-
-    teamData?.toString(1)?.let { teamWriter.write(it) }
-    teamWriter.close()
+    File(context.filesDir, "match_data.json").overwriteString(matchData?.toString(1))
+    File(context.filesDir, "team_data.json").overwriteString(teamData?.toString(1))
 }
 
 fun openFile(context: Context) {
     matchData = try {
-        JSONObject(String(FileInputStream(File(context.filesDir, "match_data.json")).readBytes()))
+        JSONObject(File(context.filesDir, "match_data.json").readText())
     } catch (e: JSONException) {
         null
     }
     teamData = try {
-        JSONObject(String(FileInputStream(File(context.filesDir, "match_data.json")).readBytes()))
+        JSONObject(File(context.filesDir, "team_data.json").readText())
     } catch (e: JSONException) {
         null
     }
-    openScoutFile(context)
+    loadScoutingLogs(context)
 }
 
-fun openScoutFile(context: Context) {
-
-    var tempScoutData = JSONObject()
-    try {
-        tempScoutData =
-            JSONObject(String(FileInputStream(File(context.filesDir, "match_scouting_data.json")).readBytes()))
-    } catch (_: JSONException) {
-
-    } catch (_: FileNotFoundException) {
-        return
-    }
-
-    repeat (6) {
+fun loadScoutingLogs(context: Context) {
+    val data =
         try {
-            val array = tempScoutData[it.toString()] as JSONArray
-            for (i in 0..<array.length()) {
-                matchScoutArray.putIfAbsent(it, HashMap())
-                matchScoutArray[it]?.set(i, array[i] as String)
-            }
-        } catch (_: JSONException) {}
-    }
+            JSONObject(
+                String(
+                    FileInputStream(
+                        File(
+                            context.filesDir,
+                            "match_scouting_data.json"
+                        )
+                    ).readBytes()
+                )
+            )
+        } catch (_: Throwable) {
+            return null
+        }
 
+    (0..5).mapNotNull<Int, Pair<Int, Map<Int, String>>> {
+        try {
+            val array = data[it.toString()] as JSONArray
+            val position = mutableMapOf<Int, String>()
+
+            for (i in 0..<array.length()) {
+                position[i] = array[i] as String
+            }
+
+            it to position
+        } catch (_: JSONException) {
+            null
+        }
+    }.associate { it }
 }
 
 
 fun exportScoutData(context: Context) {
-
     val file = File(context.filesDir, "match_scouting_data.json")
     file.delete()
     file.createNewFile()
     val jsonObject = getJsonFromMatchHash()
 
-    matchScoutArray.values
     val writer = FileWriter(file)
     writer.write(jsonObject.toString(1))
     writer.close()
 }
 
 
-
-fun deleteFile(context: Context){
+fun deleteFile(context: Context) {
     val file = File(context.filesDir, "match_scouting_data.json")
     file.delete()
 }

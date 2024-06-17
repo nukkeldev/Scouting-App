@@ -35,7 +35,7 @@ suspend fun sync(refresh: Boolean, context: Context): Boolean {
         teamError = syncTeams(refresh, context)
         matchError = syncMatches(refresh, context)
         if (teamError && matchError) {
-            createFile(context)
+//            createFile(context)
             lastSynced.value = Instant.now()
         }
     }
@@ -50,7 +50,7 @@ fun syncTeams(refresh: Boolean, context: Context): Boolean {
             return true
         }
         try {
-            openFile(context)
+//            openFile(context)
             return true
         } catch (e: FileNotFoundException) {
             return false
@@ -66,7 +66,7 @@ fun syncTeams(refresh: Boolean, context: Context): Boolean {
         teamData = JSONObject("{\"teams\":$teams}")
     } catch (e: java.net.UnknownHostException) {
         try {
-            openFile(context)
+//            openFile(context)
         } catch (e: FileNotFoundException) {
             return false
         }
@@ -81,7 +81,7 @@ fun syncMatches(refresh: Boolean, context: Context): Boolean {
             return true
         }
         try {
-            openFile(context)
+//            openFile(context)
             return true
         } catch (e: FileNotFoundException) {
             return false
@@ -97,7 +97,7 @@ fun syncMatches(refresh: Boolean, context: Context): Boolean {
         matchData = JSONObject("{\"matches\":$matches}")
     } catch (e: java.net.UnknownHostException) {
         try {
-            openFile(context)
+//            openFile(context)
         } catch (e: FileNotFoundException) {
             return false
         }

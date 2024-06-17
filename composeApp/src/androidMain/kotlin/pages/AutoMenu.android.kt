@@ -1,113 +1,106 @@
 package pages
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bumble.appyx.components.backstack.BackStack
-import com.bumble.appyx.components.backstack.operation.pop
 import com.bumble.appyx.components.backstack.operation.push
-//import composables.AutoCheckboxesHorizontal
-//import composables.AutoCheckboxesVertical
 import composables.EnumerableValue
 import defaultOnPrimary
 import defaultSecondary
-import exportScoutData
-import keyboardAsState
-import nodes.*
+import nodes.AutoTeleSelectorNode
+import nodes.RootNode
+import nodes.ScoutingLog
 
 @Composable
 actual fun AutoMenu(
     backStack: BackStack<AutoTeleSelectorNode.NavTarget>,
     mainMenuBackStack: BackStack<RootNode.NavTarget>,
-
-    selectAuto: MutableState<Boolean>,
-
-    match: MutableState<String>,
-    team: MutableIntState,
-    robotStartPosition: MutableIntState
+    scoutingLog: MutableState<ScoutingLog>,
+    scoutName: String,
+    saveLog: (clear: Boolean) -> Unit
 ) {
-    val context = LocalContext.current
-    fun bob() {
-        mainMenuBackStack.pop()
-        matchScoutArray.putIfAbsent(robotStartPosition.intValue, HashMap())
-        matchScoutArray[robotStartPosition.intValue]?.set(Integer.parseInt(match.value),
-            createOutput(team, robotStartPosition)
-        )
-        exportScoutData(context)
-    }
-
     val scrollState = rememberScrollState(0)
-    val isScrollEnabled = remember{ mutableStateOf(true) }
-    val isKeyboardOpen by keyboardAsState()
-    if(!isKeyboardOpen){
-        isScrollEnabled.value = true
-    }
-//    val flippingAuto = remember { mutableStateOf(false)}
-//    val rotateAuto = remember { mutableStateOf(false)}
-
 
     Column(
         Modifier
-            .verticalScroll(state = scrollState, enabled = isScrollEnabled.value)
+            .verticalScroll(state = scrollState)
             .padding(20.dp)
     ) {
-
-        EnumerableValue(label = "Speaker", value = autoSpeakerNum)
-        EnumerableValue(label = "Amp", value = autoAmpNum)
-
+        EnumerableValue(
+            label = "Speaker",
+            get = { scoutingLog.value.autoSpeakerNum },
+            set = { scoutingLog.value = scoutingLog.value.copy(autoSpeakerNum = it) })
+        EnumerableValue(
+            label = "Amp",
+            get = { scoutingLog.value.autoAmpNum },
+            set = { scoutingLog.value = scoutingLog.value.copy(autoAmpNum = it) })
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        EnumerableValue(label = "S Missed", value = autoSMissed)
-        EnumerableValue(label = "A Missed", value = autoAMissed)
-
-//        if(rotateAuto.value){
-//            AutoCheckboxesVertical(flippingAuto)
-//        }else{
-//            AutoCheckboxesHorizontal(flippingAuto)
-//        }
-//
-//        Column {
-//            OutlinedButton(onClick = { flippingAuto.value = !flippingAuto.value }) {
-//                Text(text = "Flip Auto Boxes", color = Color.White)
-//            }
-//            OutlinedButton(onClick = { rotateAuto.value = !rotateAuto.value }) {
-//                Text(text = "Rotate Auto Boxes", color = Color.White)
-//            }
-//        }
+        EnumerableValue(
+            label = "S Missed",
+            get = { scoutingLog.value.autoSMissed },
+            set = { scoutingLog.value = scoutingLog.value.copy(autoSMissed = it) })
+        EnumerableValue(
+            label = "A Missed",
+            get = { scoutingLog.value.autoAMissed },
+            set = { scoutingLog.value = scoutingLog.value.copy(autoAMissed = it) })
 
         OutlinedTextField(
-            value = autos.value,
-            onValueChange ={autos.value = it},
-            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color.Cyan, unfocusedBorderColor = Color.Yellow,focusedContainerColor = Color(6,9,13), unfocusedContainerColor = Color(6,9,13) ,focusedTextColor = defaultOnPrimary, unfocusedTextColor = defaultOnPrimary, cursorColor = defaultOnPrimary),
+            value = scoutingLog.value.autos ?: "",
+            onValueChange = { scoutingLog.value = scoutingLog.value.copy(autos = it) },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Cyan,
+                unfocusedBorderColor = Color.Yellow,
+                focusedContainerColor = Color(6, 9, 13),
+                unfocusedContainerColor = Color(6, 9, 13),
+                focusedTextColor = defaultOnPrimary,
+                unfocusedTextColor = defaultOnPrimary,
+                cursorColor = defaultOnPrimary
+            ),
             shape = RoundedCornerShape(15.dp),
-            placeholder ={Text("AUTOS", color = Color.White)},
+            placeholder = { Text("Autos", color = Color.White) },
             modifier = Modifier
                 .fillMaxWidth(9f / 10f)
                 .align(Alignment.CenterHorizontally)
                 .height(70.dp)
         )
 
-        Row(){
-            Text(text = "Auto Stop ⚠\uFE0F",
+        Row() {
+            Text(
+                text = "Auto Stop ⚠\uFE0F",
                 fontSize = 18.sp,
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
             Checkbox(
-                when(autoStop.intValue) {0 -> false; 1 -> true; else -> false},
+                scoutingLog.value.autoStop,
                 colors = CheckboxDefaults.colors(checkedColor = Color.Cyan),
-                onCheckedChange = { when(it) {true -> autoStop.intValue = 1; false -> autoStop.intValue = 0}}
+                onCheckedChange = {
+                    scoutingLog.value = scoutingLog.value.copy(autoStop = it)
+                }
             )
         }
 
@@ -119,7 +112,6 @@ actual fun AutoMenu(
             colors = ButtonDefaults.buttonColors(containerColor = defaultSecondary),
             onClick = {
                 backStack.push(AutoTeleSelectorNode.NavTarget.TeleScouting)
-                selectAuto.value = true
             },
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
@@ -136,9 +128,7 @@ actual fun AutoMenu(
             border = BorderStroke(2.dp, color = Color.Yellow),
             shape = CircleShape,
             colors = ButtonDefaults.buttonColors(containerColor = defaultSecondary),
-            onClick = {
-                bob()
-            },
+            onClick = { saveLog(true) },
             modifier = Modifier.align(Alignment.End)
         ) {
             Text(
@@ -146,6 +136,6 @@ actual fun AutoMenu(
                 color = Color.Yellow
             )
         }
-        Text(scoutName.value)
+        Text(scoutName)
     }
 }
