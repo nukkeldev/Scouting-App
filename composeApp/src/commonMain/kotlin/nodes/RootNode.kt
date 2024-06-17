@@ -16,6 +16,8 @@ import com.bumble.appyx.navigation.composable.AppyxNavigationContainer
 import com.bumble.appyx.navigation.modality.NodeContext
 import com.bumble.appyx.navigation.node.Node
 import com.bumble.appyx.navigation.node.node
+import com.bumble.appyx.utils.multiplatform.Parcelable
+import com.bumble.appyx.utils.multiplatform.Parcelize
 import pages.LoginMenu
 import pages.MainMenu
 import pages.PitsScoutMenu
@@ -40,10 +42,14 @@ class RootNode(
     private var pitsPerson = mutableStateOf("P1")
     private var comp = mutableStateOf("")
 
-    sealed class NavTarget {
+    sealed class NavTarget : Parcelable {
+        @Parcelize
         data object MainMenu : NavTarget()
+        @Parcelize
         data object MatchScouting : NavTarget()
+        @Parcelize
         data object PitsScouting : NavTarget()
+        @Parcelize
         data object LoginPage : NavTarget()
     }
 
@@ -70,7 +76,13 @@ class RootNode(
                 backStack
             )
 
-            NavTarget.PitsScouting -> node(nodeContext)  { PitsScoutMenu(backStack, pitsPerson, scoutName) }
+            NavTarget.PitsScouting -> node(nodeContext) {
+                PitsScoutMenu(
+                    backStack,
+                    pitsPerson,
+                    scoutName
+                )
+            }
         }
 
     @Composable

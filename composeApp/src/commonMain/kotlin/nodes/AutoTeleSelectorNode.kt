@@ -14,6 +14,8 @@ import com.bumble.appyx.navigation.composable.AppyxNavigationContainer
 import com.bumble.appyx.navigation.modality.NodeContext
 import com.bumble.appyx.navigation.node.Node
 import com.bumble.appyx.navigation.node.node
+import com.bumble.appyx.utils.multiplatform.Parcelable
+import com.bumble.appyx.utils.multiplatform.Parcelize
 import pages.AutoMenu
 import pages.AutoTeleSelectorMenu
 import pages.TeleMenu
@@ -36,8 +38,10 @@ class AutoTeleSelectorNode(
 ) {
     private val selectAuto = mutableStateOf(false)
 
-    sealed class NavTarget {
+    sealed class NavTarget : Parcelable {
+        @Parcelize
         data object AutoScouting : NavTarget()
+        @Parcelize
         data object TeleScouting : NavTarget()
     }
 
