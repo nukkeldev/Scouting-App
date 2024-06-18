@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -39,7 +40,6 @@ import composables.InternetErrorAlert
 import defaultBackground
 import defaultOnBackground
 import defaultPrimaryVariant
-import getCurrentTheme
 import nodes.AutoTeleSelectorNode
 import nodes.RootNode
 import java.lang.Integer.parseInt
@@ -114,11 +114,11 @@ actual fun AutoTeleSelectorMenu(
                         team.intValue = parseInt(teamNumAsText)
                 },
                 colors = TextFieldDefaults.colors(
-                    unfocusedContainerColor = getCurrentTheme().background,
-                    unfocusedTextColor = getCurrentTheme().onPrimary,
-                    focusedContainerColor = getCurrentTheme().background,
-                    focusedTextColor = getCurrentTheme().onPrimary,
-                    cursorColor = getCurrentTheme().onSecondary
+                    unfocusedContainerColor = MaterialTheme.colorScheme.background,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onPrimary,
+                    focusedContainerColor = MaterialTheme.colorScheme.background,
+                    focusedTextColor = MaterialTheme.colorScheme.onPrimary,
+                    cursorColor = MaterialTheme.colorScheme.onSecondary
                 ),
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
@@ -161,11 +161,11 @@ actual fun AutoTeleSelectorMenu(
 //                },
 //                modifier = Modifier.fillMaxWidth(),
 //                colors = TextFieldDefaults.colors(
-//                    unfocusedContainerColor = getCurrentTheme().background,
-//                    unfocusedTextColor = getCurrentTheme().onPrimary,
-//                    focusedContainerColor = getCurrentTheme().background,
-//                    focusedTextColor = getCurrentTheme().onPrimary,
-//                    cursorColor = getCurrentTheme().onSecondary
+//                    unfocusedContainerColor = MaterialTheme.colorScheme.background,
+//                    unfocusedTextColor = MaterialTheme.colorScheme.onPrimary,
+//                    focusedContainerColor = MaterialTheme.colorScheme.background,
+//                    focusedTextColor = MaterialTheme.colorScheme.onPrimary,
+//                    cursorColor = MaterialTheme.colorScheme.onSecondary
 //                ),
 //                singleLine = true,
 //                textStyle = TextStyle.Default.copy(fontSize = 28.sp)

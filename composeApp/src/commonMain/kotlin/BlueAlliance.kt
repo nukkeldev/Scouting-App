@@ -1,6 +1,7 @@
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.mutableStateOf
+import data.RobotPosition
 import kotlinx.serialization.json.JsonObject
 import okhttp3.Headers
 import okhttp3.OkHttpClient
@@ -27,8 +28,8 @@ fun run(url: String, headers: Headers): String {
 }
 
 expect fun setTeam(
-    match: Int?,
-    robotStartPosition: Int?,
+    matchNumber: Int?,
+    position: RobotPosition?,
     setTeamNumber: (Int) -> Unit
 )
 
@@ -36,7 +37,7 @@ expect fun setTeam(
 var lastSynced = mutableStateOf(Instant.now())
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun getLastSynced() : String {
+fun getLastSynced(): String {
     val formatter = DateTimeFormatter.ofPattern(PATTERN_FORMAT)
         .withZone(ZoneId.systemDefault())
 
@@ -46,6 +47,5 @@ fun getLastSynced() : String {
 private const val PATTERN_FORMAT = "dd/MM/yyyy @ hh:mm"
 
 
-
-
-const val apiKeyEncoded = "eEtWS2RkemlRaTlJWkJhYXMxU0M0cUdlVkVTMXdaams3VDhUckZ1amFSODFmQlFIUXgybTdzTGJoZ0lnQVNPRw=="
+const val apiKeyEncoded =
+    "eEtWS2RkemlRaTlJWkJhYXMxU0M0cUdlVkVTMXdaams3VDhUckZ1amFSODFmQlFIUXgybTdzTGJoZ0lnQVNPRw=="

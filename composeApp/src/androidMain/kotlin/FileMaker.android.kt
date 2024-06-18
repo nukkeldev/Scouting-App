@@ -4,84 +4,36 @@ import android.hardware.usb.UsbRequest
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.compose.runtime.snapshots.SnapshotStateMap
-import kotlinx.serialization.ExperimentalSerializationApi
+import data.overwriteString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.decodeFromStream
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonPrimitive
+import nodes.FILES_DIRECTORY
 import java.io.File
-import java.io.FileInputStream
 import java.io.IOException
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.net.SocketException
 import java.nio.ByteBuffer
 
-fun File.overwriteString(data: String?) {
-    if (delete()) createNewFile()
-
-    writer().use { writer ->
-        data?.let { writer.write(it) }
+fun loadMatchAndTeamFiles(): Boolean {
+    try {
+        matchData = Json.decodeFromString(
+            File(
+                FILES_DIRECTORY, "match_data.json"
+            ).readText()
+        ) as JsonObject
+    } catch (_: Exception) {
     }
-}
-
-fun createMatchAndTeamFiles(filesDir: File) {
-    File(filesDir, "match_data.json").overwriteString(matchData?.toString())
-    File(filesDir, "team_data.json").overwriteString(teamData?.toString())
-}
-
-fun loadMatchAndTeamFiles(filesDir: File): Boolean {
-    matchData =
-        Json.decodeFromString(
+    try {
+        teamData = Json.decodeFromString(
             File(
-                filesDir,
-                "match_data.json"
+                FILES_DIRECTORY, "team_data.json"
             ).readText()
-        ) as? JsonObject
-    teamData =
-        Json.decodeFromString(
-            File(
-                filesDir,
-                "team_data.json"
-            ).readText()
-        ) as? JsonObject
+        ) as JsonObject
+    } catch (_: Exception) {
+    }
 
     return matchData != null && teamData != null
-}
-
-@OptIn(ExperimentalSerializationApi::class)
-fun loadScoutingData(filesDir: File, scoutingLogs: SnapshotStateMap<Int, MutableMap<Int, String>>) {
-    val data = Json.decodeFromStream(
-        FileInputStream(
-            File(
-                filesDir,
-                "match_scouting_data.json"
-            )
-        )
-    ) as? JsonObject ?: return
-
-    (0..5).forEach {
-        val array = data[it.toString()]?.jsonArray ?: return@forEach
-        val position = mutableMapOf<Int, String>()
-
-        for (i in 0..<array.size) {
-            position[i] = array[i].jsonPrimitive.toString()
-        }
-
-        scoutingLogs[it] = position
-    }
-}
-
-fun exportScoutingData(filesDir: File, scoutingLogs: Map<Int, MutableMap<Int, String>>) {
-    File(filesDir, "match_scouting_data.json").overwriteString(
-        getJsonFromMatchHash(scoutingLogs).toString()
-    )
-}
-
-fun deleteScoutingDataFile(filesDir: File) {
-    File(filesDir, "match_scouting_data.json").delete()
 }
 
 fun sendData(receiver: String, data: JsonObject) {

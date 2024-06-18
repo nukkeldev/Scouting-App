@@ -1,3 +1,4 @@
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.ui.graphics.Color
 
 //val defaultPrimary = Color(39, 42, 89)
@@ -25,3 +26,24 @@ val defaultOnSecondary = Color.Yellow
 val defaultOnBackground = Color.Yellow
 val defaultOnSurface = Color(15,15,15)
 val defaultOnError = Color(6,9,13)
+
+val defaultScheme = darkColorScheme(
+    primary = defaultPrimary,
+    onPrimary = defaultOnPrimary,
+    primaryContainer = defaultPrimary,
+    onPrimaryContainer = defaultOnPrimary,
+    inversePrimary = defaultOnPrimary,
+    secondary = defaultSecondary,
+    onSecondary = defaultOnSecondary,
+    secondaryContainer = defaultSecondary,
+    onSecondaryContainer = defaultOnSecondary,
+    tertiary = Color(15,15,15),
+    onTertiary = Color(0xfff4f3ef),
+    tertiaryContainer = Color(15,15,15),
+    onTertiaryContainer = Color(0xfff4f3ef),
+    background = defaultBackground,
+    onBackground = defaultOnBackground,
+    surface = defaultSurface,
+    onSurface = defaultOnSurface,
+    outline = defaultSecondary
+)

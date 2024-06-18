@@ -28,14 +28,10 @@ import com.bumble.appyx.components.backstack.operation.pop
 import composables.Comments
 import composables.EnumerableValue
 import defaultSecondary
-import exportScoutingData
 import nodes.AutoTeleSelectorNode
-import nodes.LocalAppConfiguration
-import nodes.LocalScoutingLog
 import nodes.LocalScoutingLogs
 import nodes.RootNode
-import ScoutingLog
-import nodes.tryLoadScoutingLog
+import data.ScoutingLog
 import setTeam
 
 @Composable
@@ -46,8 +42,9 @@ actual fun TeleMenu(
     val context = LocalContext.current
 
     val scrollState = rememberScrollState(0)
-    val scoutingLog = LocalScoutingLog.current
     val scoutingLogs = LocalScoutingLogs.current
+    val scoutingLog = scoutingLogs.value.currentLog
+    val scoutingLogValue = scoutingLog.value!!
 
     Column(
         Modifier
@@ -57,56 +54,56 @@ actual fun TeleMenu(
 
         EnumerableValue(
             label = "Speaker",
-            get = { scoutingLog.value.teleSpeakerNum },
-            set = { scoutingLog.value = scoutingLog.value.copy(teleSpeakerNum = it) })
+            get = { scoutingLogValue.teleSpeakerNum },
+            set = { scoutingLog.value = scoutingLogValue.copy(teleSpeakerNum = it) })
         EnumerableValue(
             label = "Amp",
-            get = { scoutingLog.value.teleAmpNum },
-            set = { scoutingLog.value = scoutingLog.value.copy(teleAmpNum = it) })
+            get = { scoutingLogValue.teleAmpNum },
+            set = { scoutingLog.value = scoutingLogValue.copy(teleAmpNum = it) })
         EnumerableValue(
             label = "Passed",
-            get = { scoutingLog.value.telePassed },
-            set = { scoutingLog.value = scoutingLog.value.copy(telePassed = it) })
+            get = { scoutingLogValue.telePassed },
+            set = { scoutingLog.value = scoutingLogValue.copy(telePassed = it) })
         EnumerableValue(
             label = "Trap",
-            get = { scoutingLog.value.teleTrapNum },
-            set = { scoutingLog.value = scoutingLog.value.copy(teleTrapNum = it) })
+            get = { scoutingLogValue.teleTrapNum },
+            set = { scoutingLog.value = scoutingLogValue.copy(teleTrapNum = it) })
 
         Spacer(modifier = Modifier.height(30.dp))
 
         EnumerableValue(
             label = "S Missed",
-            get = { scoutingLog.value.teleSMissed },
-            set = { scoutingLog.value = scoutingLog.value.copy(teleSMissed = it) })
+            get = { scoutingLogValue.teleSMissed },
+            set = { scoutingLog.value = scoutingLogValue.copy(teleSMissed = it) })
         EnumerableValue(
             label = "A Missed",
-            get = { scoutingLog.value.teleAMissed },
-            set = { scoutingLog.value = scoutingLog.value.copy(teleAMissed = it) })
+            get = { scoutingLogValue.teleAMissed },
+            set = { scoutingLog.value = scoutingLogValue.copy(teleAMissed = it) })
 
         Spacer(modifier = Modifier.height(30.dp))
 
         EnumerableValue(
             label = "S Received",
-            get = { scoutingLog.value.teleSReceived },
-            set = { scoutingLog.value = scoutingLog.value.copy(teleSReceived = it) })
+            get = { scoutingLogValue.teleSReceived },
+            set = { scoutingLog.value = scoutingLogValue.copy(teleSReceived = it) })
         EnumerableValue(
             label = "A Received",
-            get = { scoutingLog.value.teleAReceived },
-            set = { scoutingLog.value = scoutingLog.value.copy(teleAReceived = it) })
+            get = { scoutingLogValue.teleAReceived },
+            set = { scoutingLog.value = scoutingLogValue.copy(teleAReceived = it) })
 
         Row {
             Text("Lost Comms?")
             Checkbox(
-                scoutingLog.value.lostComms,
+                scoutingLogValue.lostComms,
                 onCheckedChange = {
-                    scoutingLog.value = scoutingLog.value.copy(lostComms = it)
+                    scoutingLog.value = scoutingLogValue.copy(lostComms = it)
                 })
         }
 
 
         HorizontalDivider(color = Color.Yellow, thickness = 4.dp)
 
-        Comments({ scoutingLog.value.teleNotes ?: "" }, { scoutingLog.value = scoutingLog.value.copy(teleNotes = it) })
+        Comments({ scoutingLogValue.teleNotes }, { scoutingLog.value = scoutingLogValue.copy(teleNotes = it) })
 
         Spacer(Modifier.height(15.dp))
 
@@ -116,22 +113,14 @@ actual fun TeleMenu(
             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 15.dp),
             colors = ButtonDefaults.buttonColors(containerColor = defaultSecondary),
             onClick = {
-                val pos = scoutingLog.value.robotStartPosition ?: return@OutlinedButton
-                val match = scoutingLog.value.match ?: return@OutlinedButton
+                val match = scoutingLogValue.match
+                val pos = scoutingLogValue.position
 
-                scoutingLogs.putIfAbsent(pos, mutableMapOf())
-                scoutingLogs[pos]?.set(match, scoutingLog.value.toString())
-
-                scoutingLog.value = ScoutingLog(
-                    team = scoutingLog.value.team,
-                    match = match + 1,
-                    robotStartPosition = pos
-                )
-                exportScoutingData(context.filesDir, scoutingLogs)
-                tryLoadScoutingLog(scoutingLog, scoutingLogs)
+                scoutingLogs.value.setCurrentLog(match, pos)
+                scoutingLogs.value.exportToFile(context.filesDir)
 
                 backStack.pop()
-                setTeam(match, pos) { scoutingLog.value = scoutingLog.value.copy(team = it) }
+                setTeam(match, pos) { scoutingLog.value = scoutingLogValue.copy(team = it) }
             },
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {

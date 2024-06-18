@@ -36,7 +36,6 @@ kotlin {
             implementation(libs.webcam.capture)
             implementation(compose.runtime)
             implementation(compose.foundation)
-            implementation(compose.material)
             implementation(compose.components.resources)
             implementation(libs.androidx.compiler)
             implementation(libs.kotlinx.coroutines.core)

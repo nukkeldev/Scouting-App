@@ -16,6 +16,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -32,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.bumble.appyx.components.backstack.BackStack
 import com.bumble.appyx.components.backstack.operation.push
 import compKey
-import getCurrentTheme
+import defaultPrimaryVariant
 import nodes.LocalAppConfiguration
 import nodes.RootNode
 import org.jetbrains.compose.resources.painterResource
@@ -60,13 +61,13 @@ fun LoginMenu(backStack: BackStack<RootNode.NavTarget>) {
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
             val colors = OutlinedTextFieldDefaults.colors(
-                unfocusedContainerColor = getCurrentTheme().background,
-                unfocusedTextColor = getCurrentTheme().onPrimary,
-                focusedContainerColor = getCurrentTheme().background,
-                focusedTextColor = getCurrentTheme().onPrimary,
-                cursorColor = getCurrentTheme().onSecondary,
+                unfocusedContainerColor = MaterialTheme.colorScheme.background,
+                unfocusedTextColor = MaterialTheme.colorScheme.onPrimary,
+                focusedContainerColor = MaterialTheme.colorScheme.background,
+                focusedTextColor = MaterialTheme.colorScheme.onPrimary,
+                cursorColor = MaterialTheme.colorScheme.onSecondary,
                 focusedBorderColor = Color.Cyan,
-                unfocusedBorderColor = getCurrentTheme().secondary
+                unfocusedBorderColor = MaterialTheme.colorScheme.secondary
             )
 
             OutlinedTextField(
@@ -95,18 +96,18 @@ fun LoginMenu(backStack: BackStack<RootNode.NavTarget>) {
                 OutlinedButton(
                     onClick = { competitionDropdown = true },
                     shape = RoundedCornerShape(15.dp),
-                    border = BorderStroke(3.dp, color = getCurrentTheme().primaryVariant),
-                    colors = ButtonDefaults.buttonColors(containerColor = getCurrentTheme().primary)
+                    border = BorderStroke(3.dp, color = defaultPrimaryVariant),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
                     Box(modifier = Modifier.fillMaxWidth()) {
                         Text(
                             text = "Competition: ${selectedComp.displayName}",
-                            color = getCurrentTheme().onPrimary,
+                            color = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.align(Alignment.CenterStart)
                         )
                         Text(
                             text = "V",
-                            color = getCurrentTheme().onPrimary,
+                            color = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.align(Alignment.CenterEnd)
                         )
                     }
@@ -114,7 +115,7 @@ fun LoginMenu(backStack: BackStack<RootNode.NavTarget>) {
                 DropdownMenu(
                     expanded = competitionDropdown,
                     onDismissRequest = { competitionDropdown = false; },
-                    modifier = Modifier.background(color = getCurrentTheme().onSurface)
+                    modifier = Modifier.background(color = MaterialTheme.colorScheme.onSurface)
                 ) {
                     Competition.entries.forEach { comp ->
                         DropdownMenuItem(
@@ -125,8 +126,8 @@ fun LoginMenu(backStack: BackStack<RootNode.NavTarget>) {
                             text = {
                                 Text(
                                     text = comp.displayName,
-                                    color = getCurrentTheme().onPrimary,
-                                    modifier = Modifier.background(color = getCurrentTheme().onSurface)
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    modifier = Modifier.background(color = MaterialTheme.colorScheme.onSurface)
                                 )
                             }
                         )
@@ -136,25 +137,30 @@ fun LoginMenu(backStack: BackStack<RootNode.NavTarget>) {
         }
 
         HorizontalDivider(
-            color = getCurrentTheme().primaryVariant,
+            color = defaultPrimaryVariant,
             modifier = Modifier.padding(vertical = 16.dp)
         )
 
         OutlinedButton(
             onClick = {
+                if (firstName.isEmpty() || lastName.isEmpty()) {
+                    // TODO: Indicate
+                    return@OutlinedButton
+                }
+
                 appConfiguration.value = appConfiguration.value.copy(
                     scout = firstName to lastName,
                     competition = selectedComp
                 )
                 backStack.push(RootNode.NavTarget.MainMenu)
             },
-            border = BorderStroke(color = getCurrentTheme().primaryVariant, width = 2.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = getCurrentTheme().primary),
+            border = BorderStroke(color = defaultPrimaryVariant, width = 2.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
             Text(
                 text = "Submit",
-                color = getCurrentTheme().onPrimary
+                color = MaterialTheme.colorScheme.onPrimary
             )
         }
     }

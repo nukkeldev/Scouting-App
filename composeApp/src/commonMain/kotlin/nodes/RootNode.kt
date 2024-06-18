@@ -1,15 +1,13 @@
 package nodes
 
-import AppConfiguration
-import ScoutingLog
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import com.bumble.appyx.components.backstack.BackStack
@@ -21,11 +19,19 @@ import com.bumble.appyx.navigation.node.Node
 import com.bumble.appyx.navigation.node.node
 import com.bumble.appyx.utils.multiplatform.Parcelable
 import com.bumble.appyx.utils.multiplatform.Parcelize
+import data.AppConfiguration
+import data.ScoutingLogs
+import data.overwriteString
+import matchData
 import pages.LoginMenu
 import pages.MainMenu
+import teamData
+import java.io.File
 
-val LocalScoutingLog = compositionLocalOf { mutableStateOf(ScoutingLog()) }
-val LocalScoutingLogs = compositionLocalOf { mutableStateMapOf<Int, MutableMap<Int, String>>() }
+lateinit var FILES_DIRECTORY: File
+
+val LocalScoutingLogs: ProvidableCompositionLocal<MutableState<ScoutingLogs>> =
+    compositionLocalOf { error("No default can be provided for scouting logs. Please use in the context of a provider.") }
 val LocalAppConfiguration = compositionLocalOf { mutableStateOf(AppConfiguration()) }
 
 class RootNode(
@@ -41,9 +47,13 @@ class RootNode(
     appyxComponent = backStack,
     nodeContext = nodeContext
 ) {
-    private var scoutingLog = mutableStateOf(ScoutingLog())
     private var appConfiguration = mutableStateOf(AppConfiguration())
-    private var scoutingLogs = mutableStateMapOf<Int, MutableMap<Int, String>>()
+    private var scoutingLogs = mutableStateOf(ScoutingLogs(File(FILES_DIRECTORY, ScoutingLogs.FILE_NAME)))
+
+    init {
+        File(FILES_DIRECTORY, "match_data.json").overwriteString(matchData?.toString())
+        File(FILES_DIRECTORY, "team_data.json").overwriteString(teamData?.toString())
+    }
 
     sealed class NavTarget : Parcelable {
         @Parcelize
@@ -79,7 +89,6 @@ class RootNode(
     @Composable
     override fun Content(modifier: Modifier) {
         CompositionLocalProvider(
-            LocalScoutingLog provides scoutingLog,
             LocalScoutingLogs provides scoutingLogs,
             LocalAppConfiguration provides appConfiguration
         ) {
@@ -91,13 +100,4 @@ class RootNode(
             }
         }
     }
-}
-
-/**
- * Loads the corresponding match and robot position's data into `scoutingLog` if available.
- */
-fun tryLoadScoutingLog(scoutingLog: MutableState<ScoutingLog>, scoutingLogs: Map<Int, MutableMap<Int, String>>) {
-    scoutingLog.value =
-        scoutingLogs[scoutingLog.value.robotStartPosition]?.get(scoutingLog.value.match)?.let { ScoutingLog.deserialize(it) }
-            ?: return
 }

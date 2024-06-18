@@ -31,7 +31,7 @@ import defaultOnPrimary
 import defaultSecondary
 import nodes.AutoTeleSelectorNode
 import nodes.LocalAppConfiguration
-import nodes.LocalScoutingLog
+import nodes.LocalScoutingLogs
 import nodes.RootNode
 
 @Composable
@@ -40,7 +40,9 @@ actual fun AutoMenu(
     mainMenuBackStack: BackStack<RootNode.NavTarget>,
 ) {
     val scrollState = rememberScrollState(0)
-    val scoutingLog = LocalScoutingLog.current
+    val scoutingLogs = LocalScoutingLogs.current.value
+    val scoutingLog = scoutingLogs.currentLog
+    val scoutingLogValue = scoutingLog.value!!
     val scoutName = LocalAppConfiguration.current.value.scoutName()
 
     Column(
@@ -50,27 +52,27 @@ actual fun AutoMenu(
     ) {
         EnumerableValue(
             label = "Speaker",
-            get = { scoutingLog.value.autoSpeakerNum },
-            set = { scoutingLog.value = scoutingLog.value.copy(autoSpeakerNum = it) })
+            get = { scoutingLogValue.autoSpeakerNum },
+            set = { scoutingLog.value = scoutingLogValue.copy(autoSpeakerNum = it) })
         EnumerableValue(
             label = "Amp",
-            get = { scoutingLog.value.autoAmpNum },
-            set = { scoutingLog.value = scoutingLog.value.copy(autoAmpNum = it) })
+            get = { scoutingLogValue.autoAmpNum },
+            set = { scoutingLog.value = scoutingLogValue.copy(autoAmpNum = it) })
 
         Spacer(modifier = Modifier.height(10.dp))
 
         EnumerableValue(
             label = "S Missed",
-            get = { scoutingLog.value.autoSMissed },
-            set = { scoutingLog.value = scoutingLog.value.copy(autoSMissed = it) })
+            get = { scoutingLogValue.autoSMissed },
+            set = { scoutingLog.value = scoutingLogValue.copy(autoSMissed = it) })
         EnumerableValue(
             label = "A Missed",
-            get = { scoutingLog.value.autoAMissed },
-            set = { scoutingLog.value = scoutingLog.value.copy(autoAMissed = it) })
+            get = { scoutingLogValue.autoAMissed },
+            set = { scoutingLog.value = scoutingLogValue.copy(autoAMissed = it) })
 
         OutlinedTextField(
-            value = scoutingLog.value.autos ?: "",
-            onValueChange = { scoutingLog.value = scoutingLog.value.copy(autos = it) },
+            value = scoutingLogValue.autos,
+            onValueChange = { scoutingLog.value = scoutingLogValue.copy(autos = it) },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = Color.Cyan,
                 unfocusedBorderColor = Color.Yellow,
@@ -95,10 +97,10 @@ actual fun AutoMenu(
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
             Checkbox(
-                scoutingLog.value.autoStop,
+                scoutingLogValue.autoStop,
                 colors = CheckboxDefaults.colors(checkedColor = Color.Cyan),
                 onCheckedChange = {
-                    scoutingLog.value = scoutingLog.value.copy(autoStop = it)
+                    scoutingLog.value = scoutingLogValue.copy(autoStop = it)
                 }
             )
         }
@@ -127,7 +129,7 @@ actual fun AutoMenu(
             border = BorderStroke(2.dp, color = Color.Yellow),
             shape = CircleShape,
             colors = ButtonDefaults.buttonColors(containerColor = defaultSecondary),
-            onClick = { TODO() },
+            onClick = { scoutingLogs.saveCurrentLog() },
             modifier = Modifier.align(Alignment.End)
         ) {
             Text(

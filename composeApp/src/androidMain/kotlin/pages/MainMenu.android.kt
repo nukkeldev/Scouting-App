@@ -29,6 +29,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -48,16 +49,14 @@ import androidx.compose.ui.window.Dialog
 import com.bumble.appyx.components.backstack.BackStack
 import com.bumble.appyx.components.backstack.operation.push
 import compKey
+import data.RobotPosition
 import defaultSecondary
-import getCurrentTheme
-import getJsonFromMatchHash
 import getLastSynced
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import matchData
 import nodes.LocalAppConfiguration
-import nodes.LocalScoutingLog
 import nodes.LocalScoutingLogs
 import nodes.RootNode
 import org.jetbrains.compose.resources.DrawableResource
@@ -92,8 +91,8 @@ actual fun MainMenu(
     var tempCompKey by remember { mutableStateOf(compKey) }
 
     val deviceList = manager.deviceList
-    val scoutingLog = LocalScoutingLog.current
     val scoutingLogs = LocalScoutingLogs.current
+    val scoutingLog = scoutingLogs.value.currentLog
 
     val appConfiguration = LocalAppConfiguration.current
 
@@ -103,7 +102,7 @@ actual fun MainMenu(
                 Log.i("USB", name)
                 DropdownMenuItem(
                     text = { Text(name) },
-                    onClick = { sendDataUSB(name, manager, getJsonFromMatchHash(scoutingLogs)) })
+                    onClick = { sendDataUSB(name, manager, scoutingLogs.value.toJson()) })
             }
         }
         if (setEventCode) {
@@ -123,7 +122,7 @@ actual fun MainMenu(
                     .scale(0.75f)
                     .align(Alignment.CenterStart)
             ) {
-                Text(text = "Login", color = getCurrentTheme().onPrimary)
+                Text(text = "Login", color = MaterialTheme.colorScheme.onPrimary)
             }
 
             Text(
@@ -132,10 +131,10 @@ actual fun MainMenu(
                 modifier = Modifier.align(Alignment.Center)
             )
         }
-        HorizontalDivider(color = getCurrentTheme().onSurface, thickness = 2.dp)
+        HorizontalDivider(color = MaterialTheme.colorScheme.onSurface, thickness = 2.dp)
         Text(
             text = "Hello ${appConfiguration.value.scoutName()}",
-            color = getCurrentTheme().onPrimary,
+            color = MaterialTheme.colorScheme.onPrimary,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
         OutlinedButton(
@@ -144,7 +143,7 @@ actual fun MainMenu(
             colors = ButtonDefaults.buttonColors(containerColor = defaultSecondary),
             contentPadding = PaddingValues(horizontal = 60.dp, vertical = 5.dp),
             onClick = {
-                syncTeamsAndMatches(false, context.filesDir)
+                syncTeamsAndMatches(false)
                 selectedPlacement = true
             },
             modifier = Modifier
@@ -153,7 +152,7 @@ actual fun MainMenu(
         ) {
             Text(
                 text = "Match",
-                color = getCurrentTheme().onPrimary,
+                color = MaterialTheme.colorScheme.onPrimary,
                 fontSize = 35.sp
             )
         }
@@ -171,11 +170,11 @@ actual fun MainMenu(
                     .background(color = Color(0, 0, 0))
             ) {
                 val matchScouting = { pos: Int ->
-                    scoutingLog.value = scoutingLog.value.copy(robotStartPosition = pos)
+                    scoutingLog.value = scoutingLog.value?.copy(position = RobotPosition.entries[pos])
                     backStack.push(RootNode.NavTarget.MatchScouting)
 
-                    setTeam(scoutingLog.value.match, scoutingLog.value.robotStartPosition) {
-                        scoutingLog.value = scoutingLog.value.copy(team = it)
+                    setTeam(scoutingLog.value?.match, scoutingLog.value?.position) {
+                        scoutingLog.value = scoutingLog.value?.copy(team = it)
                     }
                 }
 
@@ -219,7 +218,7 @@ actual fun MainMenu(
 //                ) {
 //                Text(
 //                    text = "Pits",
-//                    color = getCurrentTheme().onPrimary,
+//                    color = MaterialTheme.colorScheme.onPrimary,
 //                    fontSize = 35.sp
 //                )
 //            }
@@ -232,7 +231,7 @@ actual fun MainMenu(
                 onClick = {
                     val scope = CoroutineScope(Dispatchers.Default)
                     scope.launch {
-                        syncTeamsAndMatches(true, context.filesDir)
+                        syncTeamsAndMatches(true)
                         teamSyncedResource =
                             if (teamData == null) Res.drawable.crossmark else Res.drawable.checkmark
                         matchSyncedResource =
@@ -246,7 +245,7 @@ actual fun MainMenu(
                 Column {
                     Text(
                         text = "Sync",
-                        color = getCurrentTheme().onPrimary,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         fontSize = 35.sp,
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
@@ -323,11 +322,10 @@ actual fun MainMenu(
                         serverDialogOpen = false
                         if (ipAddress.value.matches(Regex("^((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\\b){4}\$"))) {
                             CoroutineScope(Dispatchers.Default).launch {
-                                sendData(ipAddress.value, getJsonFromMatchHash(scoutingLogs))
+                                sendData(ipAddress.value, scoutingLogs.value.toJson())
                             }
                         } else
                             ipAddressErrorDialog = true
-
                     }
                 ) {
                     Column {
