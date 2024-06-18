@@ -1,15 +1,9 @@
-import org.json.JSONArray
-import org.json.JSONObject
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 
-//fun getJsonFromMatchHash(): JSONObject {
-//    val jsonObject = JSONObject()
-//    matchScoutArray.keys.forEach {
-//        jsonObject.put(it.toString(), JSONArray())
-//        val map = matchScoutArray[it]
-//        map?.values?.forEach { outputString ->
-//            (jsonObject[it.toString()] as JSONArray).put(outputString)
-//        }
-//    }
-//
-//    return jsonObject
-//}
+fun getJsonFromMatchHash(scoutingLogs: Map<Int, MutableMap<Int, String>>): JsonObject =
+    JsonObject(scoutingLogs.map { (k, v) ->
+        k.toString() to JsonObject(v.map { (k, v) ->
+            k.toString() to JsonPrimitive(v)
+        }.associate { it })
+    }.associate { it })

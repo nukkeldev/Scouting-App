@@ -1,12 +1,13 @@
 package nodes
 
 import AppConfiguration
-import Competition
+import ScoutingLog
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -21,6 +22,7 @@ import com.bumble.appyx.navigation.node.node
 import com.bumble.appyx.utils.multiplatform.Parcelable
 import com.bumble.appyx.utils.multiplatform.Parcelize
 import pages.LoginMenu
+import pages.MainMenu
 
 val LocalScoutingLog = compositionLocalOf { mutableStateOf(ScoutingLog()) }
 val LocalScoutingLogs = compositionLocalOf { mutableStateMapOf<Int, MutableMap<Int, String>>() }
@@ -51,45 +53,27 @@ class RootNode(
         data object MatchScouting : NavTarget()
 
         @Parcelize
-        data object PitsScouting : NavTarget()
-
-        @Parcelize
         data object LoginPage : NavTarget()
     }
 
     @RequiresApi(Build.VERSION_CODES.P)
     override fun buildChildNode(navTarget: NavTarget, nodeContext: NodeContext): Node<*> =
         when (navTarget) {
-            else -> node(nodeContext) {
-                LoginMenu()
+            NavTarget.LoginPage -> node(nodeContext) {
+                LoginMenu(backStack)
             }
 
-//            NavTarget.MainMenu -> node(nodeContext) { modifier ->
-//                MainMenu(
-//                    nodeContext,
-//                    backStack,
-//                    robotStartPosition,
-//                    scoutName,
-//                    comp,
-//                    team,
-//                    modifier
-//                )
-//            }
-//
-//            NavTarget.MatchScouting -> AutoTeleSelectorNode(
-//                nodeContext,
-//                robotStartPosition,
-//                team,
-//                backStack
-//            )
-//
-//            NavTarget.PitsScouting -> node(nodeContext) {
-//                PitsScoutMenu(
-//                    backStack,
-//                    pitsPerson,
-//                    scoutName
-//                )
-//            }
+            NavTarget.MainMenu -> node(nodeContext) { modifier ->
+                MainMenu(
+                    backStack,
+                    modifier
+                )
+            }
+
+            NavTarget.MatchScouting -> AutoTeleSelectorNode(
+                nodeContext,
+                backStack
+            )
         }
 
     @Composable
@@ -109,9 +93,11 @@ class RootNode(
     }
 }
 
-@Composable
-fun tryLoadScoutingLog(match: Int, robotStartPosition: Int) {
-    LocalScoutingLog.current.value =
-        LocalScoutingLogs.current[robotStartPosition]?.get(match)?.let { ScoutingLog.deserialize(it) }
+/**
+ * Loads the corresponding match and robot position's data into `scoutingLog` if available.
+ */
+fun tryLoadScoutingLog(scoutingLog: MutableState<ScoutingLog>, scoutingLogs: Map<Int, MutableMap<Int, String>>) {
+    scoutingLog.value =
+        scoutingLogs[scoutingLog.value.robotStartPosition]?.get(scoutingLog.value.match)?.let { ScoutingLog.deserialize(it) }
             ?: return
 }

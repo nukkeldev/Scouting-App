@@ -19,7 +19,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,18 +30,18 @@ import composables.EnumerableValue
 import defaultOnPrimary
 import defaultSecondary
 import nodes.AutoTeleSelectorNode
+import nodes.LocalAppConfiguration
+import nodes.LocalScoutingLog
 import nodes.RootNode
-import nodes.ScoutingLog
 
 @Composable
 actual fun AutoMenu(
     backStack: BackStack<AutoTeleSelectorNode.NavTarget>,
     mainMenuBackStack: BackStack<RootNode.NavTarget>,
-    scoutingLog: MutableState<ScoutingLog>,
-    scoutName: String,
-    saveLog: (clear: Boolean) -> Unit
 ) {
     val scrollState = rememberScrollState(0)
+    val scoutingLog = LocalScoutingLog.current
+    val scoutName = LocalAppConfiguration.current.value.scoutName()
 
     Column(
         Modifier
@@ -128,7 +127,7 @@ actual fun AutoMenu(
             border = BorderStroke(2.dp, color = Color.Yellow),
             shape = CircleShape,
             colors = ButtonDefaults.buttonColors(containerColor = defaultSecondary),
-            onClick = { saveLog(true) },
+            onClick = { TODO() },
             modifier = Modifier.align(Alignment.End)
         ) {
             Text(

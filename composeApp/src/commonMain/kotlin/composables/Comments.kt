@@ -1,58 +1,46 @@
 package composables
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import defaultBackground
-import defaultOnBackground
 import defaultOnPrimary
-import defaultPrimaryVariant
-import androidx.compose.ui.graphics.Color
+
 @Composable
-fun Comments(text: MutableState<String>, isScrollEnabled: MutableState<Boolean>) {
+fun Comments(get: () -> String, set: (String) -> Unit) {
     Column {
         Text("Comments", fontSize = 25.sp)
         Spacer(Modifier.height(5.dp))
         Box {
             OutlinedTextField(
-                value = text.value,
+                value = get(),
                 placeholder = {
                     Text("Write Here")
                 },
                 shape = RoundedCornerShape(25.dp),
-                onValueChange = {
-                    //val oldText = text.value
-                    text.value = it
-                    isScrollEnabled.value = false
-//                    if (text.value.length > 150)
-//                        text.value = oldText
-                },
+                onValueChange = { set(it) },
                 modifier = Modifier
                     .size(400.dp, 75.dp),
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    backgroundColor = defaultBackground,
+                colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color.Cyan,
-                    unfocusedBorderColor = defaultOnBackground,
-                    textColor = defaultOnPrimary,
-                    cursorColor = defaultPrimaryVariant,
-                )
+                    unfocusedBorderColor = Color.Yellow,
+                    focusedContainerColor = Color(6, 9, 13),
+                    unfocusedContainerColor = Color(6, 9, 13),
+                    focusedTextColor = defaultOnPrimary,
+                    unfocusedTextColor = defaultOnPrimary,
+                    cursorColor = defaultOnPrimary
+                ),
             )
-
-//            Text(
-//                "${text.value.length}/150",
-//                Modifier
-//                    .align(Alignment.BottomEnd)
-//                    .offset(x = (-7).dp, y = (-10).dp),
-//                fontSize = 10.sp, color = defaultPrimaryVariant
-//            )
         }
     }
 }
