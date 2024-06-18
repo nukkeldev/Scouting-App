@@ -4,7 +4,6 @@ import android.hardware.usb.UsbRequest
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import data.overwriteString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import nodes.FILES_DIRECTORY

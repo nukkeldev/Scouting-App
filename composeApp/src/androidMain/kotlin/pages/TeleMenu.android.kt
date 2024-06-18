@@ -31,7 +31,6 @@ import defaultSecondary
 import nodes.AutoTeleSelectorNode
 import nodes.LocalScoutingLogs
 import nodes.RootNode
-import data.ScoutingLog
 import setTeam
 
 @Composable

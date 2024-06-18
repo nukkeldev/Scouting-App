@@ -12,10 +12,9 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.Headers
-import java.io.File
 import java.lang.Integer.parseInt
 import java.time.Instant
-import java.util.*
+import java.util.Base64
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun syncTeamsAndMatches(refresh: Boolean) {
